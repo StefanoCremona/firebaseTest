@@ -28,25 +28,28 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+const requestPermission = async () => {
+  try {
+    await firebase.messaging().requestPermission();
+  } catch (error) {
+    // User has rejected permissions
+    console.log('permission rejected');
+  }
+};
+
 const myMethod = async () => {
   console.log(
     'myMethod: ',
     'isDeviceRegisteredForRemoteMessages',
     firebase.messaging().isDeviceRegisteredForRemoteMessages,
   );
+  const enabled = await firebase.messaging().hasPermission();
+  console.log('myMethod: ', 'hasPermission', enabled);
 
   try {
     console.log('myMethod: ', 'call get token');
     const pushToken = await firebase.messaging().getToken();
-    console.log(
-      'registerDeviceForRemoteMessages: ',
-      'setErrorUser',
-      'got token',
-      pushToken,
-    );
-    /* const { status, settings } = await checkNotifications()
-    console.log('Notification status: ', status)
-    sentrySetup(accessToken, decoded, status, pushToken) */
+    console.log('myMethod: ', 'got token', pushToken);
   } catch (error) {
     console.log('myMethod: ', 'Error after getToken: ', error);
   }
@@ -66,6 +69,13 @@ const App: () => React$Node = () => {
               <Text style={styles.footer}>Engine: Hermes</Text>
             </View>
           )}
+          <View style={styles.body}>
+            <View style={styles.getToken}>
+              <TouchableOpacity onPress={requestPermission}>
+                <Text>Ask permission</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
           <View style={styles.body}>
             <View style={styles.getToken}>
               <TouchableOpacity onPress={myMethod}>
